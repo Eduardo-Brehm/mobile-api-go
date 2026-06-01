@@ -26,8 +26,10 @@ func main() {
 	// Create repositories
 	userRepo := db.NewUserRepository(database)
 
+	profileRepo := db.NewProfileRepository(database)
+
 	// Create controllers
-	authController := controllers.NewAuthController(userRepo)
+	authController := controllers.NewAuthController(userRepo, profileRepo)
 
 	// Create echo instance
 	e := echo.New()

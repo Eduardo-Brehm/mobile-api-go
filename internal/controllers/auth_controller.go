@@ -25,11 +25,12 @@ type LoginRequest struct {
 }
 
 type AuthController struct {
-	userRepo *db.UserRepository
+	userRepo    *db.UserRepository
+	profileRepo *db.ProfileRepository
 }
 
-func NewAuthController(userRepo *db.UserRepository) *AuthController {
-	return &AuthController{userRepo: userRepo}
+func NewAuthController(userRepo *db.UserRepository, profileRepo *db.ProfileRepository) *AuthController {
+	return &AuthController{userRepo: userRepo, profileRepo: profileRepo}
 }
 
 func (ac *AuthController) Register(c echo.Context) error {
@@ -59,6 +60,24 @@ func (ac *AuthController) Register(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "erro ao criar usuário"})
+	}
+
+	// Create the profile automatically when user registers
+	profile := &db.Profile{
+		UsuarioID:     createdUser.ID,
+		Tipo:          req.Tipo,
+		NomeDeUsuario: req.Nome,
+		Bio:           nil,
+		FotoUrl:       nil,
+		SiteUrl:       nil,
+		CriadoEm:      time.Now(),
+		AtualizadoEm:  time.Now(),
+	}
+
+	// Save the profile
+	_, err = ac.profileRepo.CreateProfile(profile)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "error creating profile"})
 	}
 
 	//return json with the created user
