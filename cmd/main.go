@@ -30,12 +30,14 @@ func main() {
 
 	// Create controllers
 	authController := controllers.NewAuthController(userRepo, profileRepo)
+	profileController := controllers.NewProfileController(profileRepo, userRepo)
 
 	// Create echo instance
 	e := echo.New()
 
 	// Setup routes
 	routes.SetupAuthRoutes(e, authController)
+	routes.SetupProfileRoutes(e, profileController)
 
 	defer database.Close()
 
